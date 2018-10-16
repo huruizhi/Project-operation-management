@@ -1,0 +1,107 @@
+pipeline {
+
+    agent {
+        label '192.168.0.158'
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    parameters {
+        //构建选项，选择构建环境
+        choice(name: 'release_env',
+                choices:'dev\npro',
+                description: 'choose release environment\ndev port:{{dev_port}}\npro port:{{pro_port}}\nserver:192.168.0.158')
+    }
+    tools {
+        maven 'M3'
+        jdk 'jdk_1.8.0_161'
+    }
+    stages {
+        stage('准备源码') {
+            steps {
+                script {
+				    project_name="pymom"
+
+                    // 需要修改自定义的变量
+					svn_addr="{{svn_address}}"
+                    module_name="{{module_name}}"
+                    workdir="/application/docker_hub/java/{{project_name}}"
+					r_env=release_env
+
+
+					docker_image="{{harbor_url}}/${project_name}/${module_name}"
+					deploy_name="${project_name}-${module_name}-${r_env}"
+					name_space="${project_name}-${r_env}"
+					deploy_file="${deploy_name}-deployment.yaml"
+					deploy_path="/application/k8s-projects/${project_name}/${module_name}/${deploy_file}"
+
+                    r_env=release_env
+                    docker_file_path="${workdir}/${module_name}_${r_env}"
+                    docker_compose_file="${workdir}/docker-compose-${r_env}.yml"
+                    docker_compose_module_name="${project_name}_${module_name}_${r_env}"
+                    // logs
+                    old_date=sh returnStdout: true ,script: "echo \$(date -d '-1 hour' '+%F-%H-%M-%S')"
+                    old_date=old_date.trim()
+					date=sh returnStdout: true ,script: "echo \$(date '+%F-%H-%M-%S')"
+                    date=date.trim()
+                    logsdir="/application/docker_hub/logs/pymom"
+                    module_logs_path="${logsdir}/${module_name}_${r_env}"
+                    sh "mkdir -p ${module_logs_path}"
+                    docker_containers_path="/var/lib/docker/containers"
+                }
+                checkout([$class: 'SubversionSCM',
+                additionalCredentials: [],
+                excludedCommitMessages: '',
+                excludedRegions: '',
+                excludedRevprop: '',
+                excludedUsers: '',
+                filterChangelog: false,
+                ignoreDirPropChanges: false,
+                includedRegions: '',
+                locations: [[credentialsId: 'dffd18a8-473e-477e-a4dc-4d528fa3e55c',
+                            depthOption: 'infinity',
+                            ignoreExternalsOption: true,
+                            local: '.',
+                            remote: svn_addr ]],
+                            quietOperation: true,
+                            workspaceUpdater: [$class: 'UpdateUpdater']])
+            }
+        }
+        stage('MVN打包') {
+            steps {
+                sh 'mvn -B -DskipTests clean package'
+            }
+        }
+        stage('MVN测试') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+		stage('创建镜像') {
+            steps {
+				sh "mkdir -p ${docker_file_path}; rm -rf ${docker_file_path}/app.jar"
+                sh "/bin/cp -a ./target/*.jar ${docker_file_path}/app.jar;"
+				sh "/bin/cp /script/dockerfiles/Dockerfile-java ${docker_file_path}/Dockerfile"
+				sh "cd ${docker_file_path} && docker build -t ${docker_image}:latest ."
+            }
+        }
+		stage('上传镜像') {
+            steps {
+				sh "docker push ${docker_image}:latest  && docker rmi ${docker_image}:latest"
+            }
+        }
+		stage('停止服务') {
+            steps {
+				sh "kubectl delete deploy ${deploy_name} -n ${name_space}"
+            }
+        }
+		stage('启动服务') {
+            steps {
+				sh "kubectl apply -f ${deploy_path}"
+            }
+        }
+    }
+}
+
