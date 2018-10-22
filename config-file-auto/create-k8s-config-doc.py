@@ -1,6 +1,6 @@
 from jinja2 import Environment, FileSystemLoader
 import os
-from config.settings import *
+from .config.settings import *
 
 
 class CreateKubernetesConfigFile:
@@ -76,7 +76,6 @@ class CreateKubernetesConfigFile:
             variables = self.service_variables
         else:
             variables = self.service_register_variables
-
         env = Environment(loader=FileSystemLoader(searchpath='./templates'))
         template = env.get_template('k8s-service-template.yaml.j2')
         config_doc = template.render(**variables)

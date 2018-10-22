@@ -1,7 +1,7 @@
 import jenkins
 from jinja2 import Environment, FileSystemLoader
 import os
-from config.settings import *
+from .config.settings import *
 
 
 class Jenkins:
