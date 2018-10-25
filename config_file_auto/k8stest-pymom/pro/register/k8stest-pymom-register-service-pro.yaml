@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose-pro.yml
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: k8stest-pymom-register-pro
+  name: k8stest-pymom-register-pro
+  namespace: k8stest-pymom-pro
+spec:
+  type: NodePort
+  ports:
+  - name: "6553"
+    port: 6553
+    targetPort: 5000
+    nodePort: 6553
+  selector:
+    io.kompose.service: k8stest-pymom-register-pro
+status:
+  loadBalancer: {}

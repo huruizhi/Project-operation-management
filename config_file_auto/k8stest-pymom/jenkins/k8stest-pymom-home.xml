@@ -10,7 +10,7 @@
       </parameters>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description>momé¦–é¡µ</description>
+  <description>momÊ×Ò³</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
@@ -18,8 +18,8 @@
         <hudson.model.ChoiceParameterDefinition>
           <name>release_env</name>
           <description>choose release environment
-dev port:{{dev_port}}
-pro port:{{pro_port}}
+dev port:6500
+pro port:6550
 server:192.168.0.200</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
@@ -52,29 +52,29 @@ server:192.168.0.200</description>
     }
 
     parameters {
-        //æ„å»ºé€‰é¡¹ï¼Œé€‰æ‹©æ„å»ºç¯å¢ƒ
+        //¹¹½¨Ñ¡Ïî£¬Ñ¡Ôñ¹¹½¨»·¾³
         choice(name: &apos;release_env&apos;,
                 choices:&apos;dev\npro&apos;,
-                description: &apos;choose release environment\ndev port:{{dev_port}}\npro port:{{pro_port}}\nserver:192.168.0.158&apos;)
+                description: &apos;choose release environment\ndev port:6500\npro port:6550\nserver:192.168.0.158&apos;)
     }
     tools {
         maven &apos;M3&apos;
         jdk &apos;jdk_1.8.0_161&apos;
     }
     stages {
-        stage(&apos;å‡†å¤‡æºç &apos;) {
+        stage(&apos;×¼±¸Ô´Âë&apos;) {
             steps {
                 script {
-				    project_name=&quot;{{project_name}}&quot;
+				    project_name=&quot;k8stest-pymom&quot;
 
-                    // éœ€è¦ä¿®æ”¹è‡ªå®šä¹‰çš„å˜é‡
-					svn_addr=&quot;{{svn_address}}&quot;
-                    module_name=&quot;{{module_name}}&quot;
-                    workdir=&quot;/application/docker_hub/java/{{project_name}}&quot;
+                    // ĞèÒªĞŞ¸Ä×Ô¶¨ÒåµÄ±äÁ¿
+					svn_addr=&quot;svn://192.168.0.151/pycf/Projects/MOMsystem/pyMomSystem-home-1.0&quot;
+                    module_name=&quot;home&quot;
+                    workdir=&quot;/application/docker_hub/java/k8stest-pymom&quot;
 					r_env=release_env
 
 
-					docker_image=&quot;{{harbor_url}}/${project_name}/${module_name}&quot;
+					docker_image=&quot;harbor.pycf.com/${project_name}/${module_name}&quot;
 					deploy_name=&quot;${project_name}-${module_name}-${r_env}&quot;
 					name_space=&quot;${project_name}-${r_env}&quot;
 					deploy_file=&quot;${deploy_name}-deployment.yaml&quot;
@@ -110,33 +110,35 @@ server:192.168.0.200</description>
                             workspaceUpdater: [$class: &apos;UpdateUpdater&apos;]])
             }
         }
-		stage(&apos;æ‹·è´ç¨‹åº&apos;) {
+        stage(&apos;MVN´ò°ü&apos;) {
             steps {
-                sh &quot;mkdir -p ${docker_file_path}/python3; rm -rf ${docker_file_path}/python3/*&quot;
-                sh &quot;/bin/cp -a ./* ${docker_file_path}/python3;&quot;
-
-                sh &quot;echo &apos;svn url: ${svn_addr}&apos; > ${docker_file_path}/README.txt&quot;
-                sh &quot;svn upgrade . &amp;> /dev/null||echo &amp;> /dev/null&quot;
+                sh &apos;mvn -B -DskipTests clean package&apos;
             }
         }
-		stage(&apos;åˆ›å»ºé•œåƒ&apos;) {
+        stage(&apos;MVN²âÊÔ&apos;) {
             steps {
-				sh &quot;/bin/cp /script/dockerfiles/Dockerfile-python ${docker_file_path}/Dockerfile&quot;
-				sh &quot;sed -i &apos;s#python_image#{{python_image}}#g&apos; &quot;
-				sh &quot;cd ${docker_file_path} &amp;&amp;docker build -t ${docker_image}:latest .&quot;
+                sh &apos;mvn test&apos;
             }
         }
-		stage(&apos;ä¸Šä¼ é•œåƒ&apos;) {
+		stage(&apos;´´½¨¾µÏñ&apos;) {
+            steps {
+				sh &quot;mkdir -p ${docker_file_path}; rm -rf ${docker_file_path}/app.jar&quot;
+                sh &quot;/bin/cp -a ./target/*.jar ${docker_file_path}/app.jar;&quot;
+				sh &quot;/bin/cp /script/dockerfiles/Dockerfile-java ${docker_file_path}/Dockerfile&quot;
+				sh &quot;cd ${docker_file_path} &amp;&amp; docker build -t ${docker_image}:latest .&quot;
+            }
+        }
+		stage(&apos;ÉÏ´«¾µÏñ&apos;) {
             steps {
 				sh &quot;docker push ${docker_image}:latest  &amp;&amp; docker rmi ${docker_image}:latest&quot;
             }
         }
-		stage(&apos;åœæ­¢æœåŠ¡&apos;) {
+		stage(&apos;Í£Ö¹·şÎñ&apos;) {
             steps {
 				sh &quot;kubectl delete deploy ${deploy_name} -n ${name_space}&quot;
             }
         }
-		stage(&apos;å¯åŠ¨æœåŠ¡&apos;) {
+		stage(&apos;Æô¶¯·şÎñ&apos;) {
             steps {
 				sh &quot;kubectl apply -f ${deploy_path}&quot;
             }

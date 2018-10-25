@@ -8,8 +8,7 @@ class CreateKubernetesConfigFile:
     def __init__(self, project_name, module_name, stage, register_module_name, harbor_url, register_port, port=None,
                  java_mem_requests=128, java_mem_limits=256, mem_requests=128, mem_limits=512, is_register=False):
         self.is_register = is_register
-        self.project_name = project_name
-        self.stage = stage
+
 
         self.deployment_variables = {
             'project_name': project_name,
@@ -18,6 +17,13 @@ class CreateKubernetesConfigFile:
             'register_module_name': register_module_name,
             'harbor_url': harbor_url,
             'register_port': register_port,
+        }
+
+        self.deployment_python_variables = {
+            'project_name': project_name,
+            'module_name': module_name,
+            'harbor_url': harbor_url,
+            'stage': stage,
         }
 
         self.resource_limit = {
@@ -80,6 +86,20 @@ class CreateKubernetesConfigFile:
 
         self._write_config_file(dir_name, file_name, config_doc)
 
+    #创建python yaml文件
+    def create_k8s_deployment_python_config_doc(self):
+        deployment_template = 'k8s-deployment-python-template.yaml.j2'
+        variables = self.deployment_python_variables
+
+        env = Environment(loader=FileSystemLoader(searchpath='./templates'))
+        template = env.get_template(deployment_template)
+        config_doc = template.render(**variables)
+        file_name = "{project_name}-{module_name}-deployment-python-{stage}.yaml".format(project_name = self.deployment_python_variables["project_name"],
+                                                                                                module_name = self.deployment_python_variables["module_name"],
+                                                                                                stage = self.deployment_python_variables["stage"])
+        dir_name = "{project_name}/{stage}/".format(project_name = self.deployment_python_variables["project_name"],stage = self.deployment_python_variables["stage"])
+        self._write_config_file(dir_name,file_name,config_doc)
+
     #创建service文件
     def _create_k8s_service_config_doc(self):
         if not self.is_register:
@@ -102,21 +122,20 @@ class CreateKubernetesConfigFile:
         self._write_config_file(dir_name, file_name, config_doc)
 
     #创建namespace文件
-    def _create_k8s_namespace_config_doc(self):
+    def create_k8s_namespace_config_doc(self):
         variables = self.namespace_variables
         env = Environment(loader=FileSystemLoader(searchpath='./templates'))
         template = env.get_template('namespace.yaml.j2')
         config_doc = template.render(**variables)
 
-        file_name = "{project_name}-{stages}-namespace.yaml".format(project_name = self.project_name,stages = self.stage)
-        dir_name = "{project_name}/{stage}/".format(project_name = self.project_name,stage = self.stage)
+        file_name = "{project_name}-{stages}-namespace.yaml".format(project_name = self.namespace_variables["project_name"],stages = self.namespace_variables["stage"])
+        dir_name = "{project_name}/{stage}/".format(project_name = self.namespace_variables["project_name"],stage = self.namespace_variables["stage"])
         self._write_config_file(dir_name,file_name,config_doc)
 
-    #同时创建deployment,service,namespace文件
+    #同时创建deployment,service文件
     def create_k8s_config_doc(self):
         self._create_k8s_deployment_config_doc()
         self._create_k8s_service_config_doc()
-        self._create_k8s_namespace_config_doc()
 
     #写配置文件
     def _write_config_file(self, dir_name, file_name, doc):
@@ -147,8 +166,8 @@ def create_jenkins_config_file(project_name, module_name, svn_address, dev_port,
         conf_file.write(config_doc)
 
 
-def run():
-    project_info = get_settings_info(11)
+def run(project_id):
+    project_info = get_settings_info(project_id)
     project_name = project_info['project_name']
     stages = project_info['stages']
     modules = project_info['modules']
@@ -175,14 +194,17 @@ def run():
                 port = dev_port
             else:
                 port = pro_port
+            config = CreateKubernetesConfigFile(project_name, module_name, stage,
+                                                register_module_name, harbor_url, register_port, port)
             if module_type == 'java':
-                config = CreateKubernetesConfigFile(project_name, module_name, stage,
-                                                    register_module_name, harbor_url, register_port, port)
                 config.create_k8s_config_doc()
+            if module_type == "python":
+                config.create_k8s_namespace_config_doc()
+                config.create_k8s_deployment_python_config_doc()
 
 
 if __name__ == '__main__':
-    run()
+    run(11)
 
 
 
