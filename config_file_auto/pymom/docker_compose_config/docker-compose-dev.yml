@@ -1,0 +1,381 @@
+version: '3'
+services:
+  register_register_dev:
+    image: harbor.pycf.com/register/register:latest
+    container_name: register_register_dev
+    hostname: register_register_dev
+    restart: always
+    ports:
+      - {port_dev}:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=pro
+    networks:
+      - dev
+
+  pymom_home_dev:
+    image: harbor.pycf.com/pymom/home:latest
+    container_name: pymom_home_dev
+    hostname: pymom_home_dev
+    restart: always
+    ports:
+      - 6500:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_managerdata_dev:
+    image: harbor.pycf.com/pymom/managerdata:latest
+    container_name: pymom_managerdata_dev
+    hostname: pymom_managerdata_dev
+    restart: always
+    ports:
+      - 6501:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_managerselect_dev:
+    image: harbor.pycf.com/pymom/managerselect:latest
+    container_name: pymom_managerselect_dev
+    hostname: pymom_managerselect_dev
+    restart: always
+    ports:
+      - 6502:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_zuulclient_dev:
+    image: harbor.pycf.com/pymom/zuulclient:latest
+    container_name: pymom_zuulclient_dev
+    hostname: pymom_zuulclient_dev
+    restart: always
+    ports:
+      - 6504:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_manager_dev:
+    image: harbor.pycf.com/pymom/manager:latest
+    container_name: pymom_manager_dev
+    hostname: pymom_manager_dev
+    restart: always
+    ports:
+      - 6505:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_outsourcehome_dev:
+    image: harbor.pycf.com/pymom/outsourcehome:latest
+    container_name: pymom_outsourcehome_dev
+    hostname: pymom_outsourcehome_dev
+    restart: always
+    ports:
+      - 6506:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_position_dev:
+    image: harbor.pycf.com/pymom/position:latest
+    container_name: pymom_position_dev
+    hostname: pymom_position_dev
+    restart: always
+    ports:
+      - 6507:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_analysis_dev:
+    image: harbor.pycf.com/pymom/analysis:latest
+    container_name: pymom_analysis_dev
+    hostname: pymom_analysis_dev
+    restart: always
+    ports:
+      - 6508:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_benchmark_dev:
+    image: harbor.pycf.com/pymom/benchmark:latest
+    container_name: pymom_benchmark_dev
+    hostname: pymom_benchmark_dev
+    restart: always
+    ports:
+      - 6509:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_group_dev:
+    image: harbor.pycf.com/pymom/group:latest
+    container_name: pymom_group_dev
+    hostname: pymom_group_dev
+    restart: always
+    ports:
+      - 6510:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_calculate_dev:
+    image: harbor.pycf.com/pymom/calculate:latest
+    container_name: pymom_calculate_dev
+    hostname: pymom_calculate_dev
+    restart: always
+    ports:
+      - 6511:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+  pymom_pythonmodule_dev:
+    image: harbor.pycf.com/pymom/pythonmodule:latest
+    container_name: pymom_pythonmodule_dev
+    hostname: pymom_pythonmodule_dev
+    restart: always
+    ports:
+      - 6514:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - python
+      - -u
+      - /python3/manage.py
+      - runserver
+      - 0.0.0.0:5000
+    networks:
+      - dev
+
+  pymom_backstage-system_dev:
+    image: harbor.pycf.com/pymom/backstage-system:latest
+    container_name: pymom_backstage-system_dev
+    hostname: pymom_backstage-system_dev
+    restart: always
+    ports:
+      - 6513:5000
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "ss -tnlp|grep -w 5000|grep -v grep"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    entrypoint:
+      - java
+      - -Xms128m
+      - -Xmx256m
+      - -jar
+      - /java8/app.jar
+      - --server.port=5000
+      - --spring.profiles.active=dev
+    networks:
+      - dev
+
+networks:
+  dev:
+    external: false
