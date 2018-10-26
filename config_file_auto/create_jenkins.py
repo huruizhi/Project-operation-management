@@ -76,8 +76,8 @@ class Jenkins:
         else:
             print("view已经存在")
 
-    def run(self):
-        #project_info = get_settings_info(project_id)
+    def run(self,project_id):
+        project_info = get_settings_info(project_id)
         project_name = project_info['project_name']
         harbor_url = project_info['harbor_url']
         modules = project_info['modules']
@@ -119,6 +119,6 @@ class Jenkins:
 
 if __name__ == '__main__':
     j = Jenkins()
-    j.run()
+    j.run(11)
 
 

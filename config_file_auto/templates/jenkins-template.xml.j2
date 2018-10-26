@@ -125,12 +125,12 @@ server:192.168.0.200</description>
 				sh &quot;mkdir -p ${docker_file_path}; rm -rf ${docker_file_path}/app.jar&quot;
                 sh &quot;/bin/cp -a ./target/*.jar ${docker_file_path}/app.jar;&quot;
 				sh &quot;/bin/cp /script/dockerfiles/Dockerfile-java ${docker_file_path}/Dockerfile&quot;
-				sh &quot;cd ${docker_file_path} &amp;&amp; docker build -t ${docker_image}:latest .&quot;
+				sh &quot;cd ${docker_file_path} &amp;&amp; docker build -t ${docker_image}:${r_env} .&quot;
             }
         }
 		stage(&apos;上传镜像&apos;) {
             steps {
-				sh &quot;docker push ${docker_image}:latest  &amp;&amp; docker rmi ${docker_image}:latest&quot;
+				sh &quot;docker push ${docker_image}:${r_env}  &amp;&amp; docker rmi ${docker_image}:${r_env}&quot;
             }
         }
 		stage(&apos;停止服务&apos;) {

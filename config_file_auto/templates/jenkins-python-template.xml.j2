@@ -123,12 +123,12 @@ server:192.168.0.200</description>
             steps {
 				sh &quot;/bin/cp /script/dockerfiles/Dockerfile-python ${docker_file_path}/Dockerfile&quot;
 				sh &quot;sed -i &apos;s#python_image#{{python_image}}#g&apos; &quot;
-				sh &quot;cd ${docker_file_path} &amp;&amp;docker build -t ${docker_image}:latest .&quot;
+				sh &quot;cd ${docker_file_path} &amp;&amp;docker build -t ${docker_image}:${r_env} .&quot;
             }
         }
 		stage(&apos;上传镜像&apos;) {
             steps {
-				sh &quot;docker push ${docker_image}:latest  &amp;&amp; docker rmi ${docker_image}:latest&quot;
+				sh &quot;docker push ${docker_image}:${r_env}  &amp;&amp; docker rmi ${docker_image}:${r_env}&quot;
             }
         }
 		stage(&apos;停止服务&apos;) {
