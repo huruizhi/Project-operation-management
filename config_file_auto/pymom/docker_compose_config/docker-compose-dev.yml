@@ -1,12 +1,12 @@
 version: '3'
 services:
-  register_register_dev:
-    image: harbor.pycf.com/register/register:latest
-    container_name: register_register_dev
-    hostname: register_register_dev
+  pymom_register_dev:
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-register:latest
+    container_name: pymom_register_dev
+    hostname: pymom_register_dev
     restart: always
     ports:
-      - {port_dev}:5000
+      - 6503:5000
     volumes:
       - /etc/localtime:/etc/localtime
     environment:
@@ -28,7 +28,7 @@ services:
       - dev
 
   pymom_home_dev:
-    image: harbor.pycf.com/pymom/home:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-home:latest
     container_name: pymom_home_dev
     hostname: pymom_home_dev
     restart: always
@@ -55,7 +55,7 @@ services:
       - dev
 
   pymom_managerdata_dev:
-    image: harbor.pycf.com/pymom/managerdata:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-managerdata:latest
     container_name: pymom_managerdata_dev
     hostname: pymom_managerdata_dev
     restart: always
@@ -82,7 +82,7 @@ services:
       - dev
 
   pymom_managerselect_dev:
-    image: harbor.pycf.com/pymom/managerselect:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-managerselect:latest
     container_name: pymom_managerselect_dev
     hostname: pymom_managerselect_dev
     restart: always
@@ -109,7 +109,7 @@ services:
       - dev
 
   pymom_zuulclient_dev:
-    image: harbor.pycf.com/pymom/zuulclient:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-zuulclient:latest
     container_name: pymom_zuulclient_dev
     hostname: pymom_zuulclient_dev
     restart: always
@@ -136,7 +136,7 @@ services:
       - dev
 
   pymom_manager_dev:
-    image: harbor.pycf.com/pymom/manager:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-manager:latest
     container_name: pymom_manager_dev
     hostname: pymom_manager_dev
     restart: always
@@ -163,7 +163,7 @@ services:
       - dev
 
   pymom_outsourcehome_dev:
-    image: harbor.pycf.com/pymom/outsourcehome:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-outsourcehome:latest
     container_name: pymom_outsourcehome_dev
     hostname: pymom_outsourcehome_dev
     restart: always
@@ -190,7 +190,7 @@ services:
       - dev
 
   pymom_position_dev:
-    image: harbor.pycf.com/pymom/position:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-position:latest
     container_name: pymom_position_dev
     hostname: pymom_position_dev
     restart: always
@@ -217,7 +217,7 @@ services:
       - dev
 
   pymom_analysis_dev:
-    image: harbor.pycf.com/pymom/analysis:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-analysis:latest
     container_name: pymom_analysis_dev
     hostname: pymom_analysis_dev
     restart: always
@@ -244,7 +244,7 @@ services:
       - dev
 
   pymom_benchmark_dev:
-    image: harbor.pycf.com/pymom/benchmark:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-benchmark:latest
     container_name: pymom_benchmark_dev
     hostname: pymom_benchmark_dev
     restart: always
@@ -271,7 +271,7 @@ services:
       - dev
 
   pymom_group_dev:
-    image: harbor.pycf.com/pymom/group:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-group:latest
     container_name: pymom_group_dev
     hostname: pymom_group_dev
     restart: always
@@ -298,7 +298,7 @@ services:
       - dev
 
   pymom_calculate_dev:
-    image: harbor.pycf.com/pymom/calculate:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-calculate:latest
     container_name: pymom_calculate_dev
     hostname: pymom_calculate_dev
     restart: always
@@ -325,7 +325,7 @@ services:
       - dev
 
   pymom_pythonmodule_dev:
-    image: harbor.pycf.com/pymom/pythonmodule:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-pythonmodule:latest
     container_name: pymom_pythonmodule_dev
     hostname: pymom_pythonmodule_dev
     restart: always
@@ -350,7 +350,7 @@ services:
       - dev
 
   pymom_backstage-system_dev:
-    image: harbor.pycf.com/pymom/backstage-system:latest
+    image: registry.cn-qingdao.aliyuncs.com/pystandard/pymom-backstage-system:latest
     container_name: pymom_backstage-system_dev
     hostname: pymom_backstage-system_dev
     restart: always

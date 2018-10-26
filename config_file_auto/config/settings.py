@@ -29,7 +29,8 @@ def get_settings_info(project_id):
         section_name = str(row[9]).split("/")[0]
         if  str(row[9]).split("/")[1] == "register":
             setting_info['register'] = ["register",
-                                        "{port_pro}".format(port_pro = port_pro),"{port_dev}",
+                                        "{port_pro}".format(port_pro = port_pro),
+                                        "{port_dev}".format(port_dev = port_dev),
                                         "{svn_url}".format(svn_url = svn_url),
                                         "java"]
         else:
