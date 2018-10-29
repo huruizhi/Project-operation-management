@@ -6,17 +6,10 @@
 import subprocess
 from datetime import datetime
 from config_file_auto.config.settings import *
+from config_file_auto.config.ssh_tools import *
 
-
+#上线到阿里云的时间tag
 up_to_ali_tag = datetime.now().strftime('%Y-%m-%d.%H-%M-%S')
-
-
-# def runCmd(cmd):
-#     res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#     sout,serr = res.communicate()
-#     print (sout,serr)
-#     #return res.returncode, sout, serr, res.pid
-#     return sout, serr
 
 #选择项目
 project_id = input("请输入需要上线的项目id: ")
@@ -34,6 +27,7 @@ for module in modules:
 print("项目名称为:{project_name}\n"
       "模块信息为:".format(project_name = project_info["project_name"]))
 
+
 #将项目中的模块以id的形式添加到字典中
 i = 1
 module_dict = {}
@@ -44,10 +38,10 @@ for module in module_list:
     i = int(i)
     i += 1
 
+
 select_module_id_group = input("请输入需要上线模块id(若有多个模块上线请以逗号隔开输入，如1，2，3，若所有模块需要上线请输入all)\n:")
 
-
-#将选择的模块添加到字典中
+#将选择的模块添加到列表中
 online_module_group = []
 if select_module_id_group == "all":
     for k,v in module_dict.items():
@@ -59,7 +53,6 @@ else:
 
 print("上线模块为{online_module_group}".format(online_module_group = online_module_group))
 
-#先给上线模块打上tag
 
 #开始打docker 镜像tag
 for on_line_module in online_module_group:
@@ -83,7 +76,6 @@ for on_line_module in online_module_group:
     subprocess.call(cmd_shell_up_aliyun_backtag, shell=True)
 
 
-
-
+#开始上线
 
 
