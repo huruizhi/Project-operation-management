@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose-pro.yml
+    kompose.version: 1.7.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: k8stest-pymom-outsourcebenchmark-dev
+  name: k8stest-pymom-outsourcebenchmark-dev
+  namespace: k8stest-pymom-dev
+spec:
+  type: NodePort
+  ports:
+  - name: "6509"
+    port: 6509
+    targetPort: 5000
+    nodePort: 6509
+  selector:
+    io.kompose.service: k8stest-pymom-outsourcebenchmark-dev
+status:
+  loadBalancer: {}

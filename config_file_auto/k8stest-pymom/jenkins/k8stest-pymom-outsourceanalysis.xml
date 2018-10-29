@@ -1,0 +1,154 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.23">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>release_env</string>
+      </parameters>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>mom首页</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>release_env</name>
+          <description>choose release environment
+dev port:6508
+pro port:6558
+server:192.168.0.200</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>dev</string>
+              <string>pro</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty/>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>15</daysToKeep>
+        <numToKeep>15</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+    <script>pipeline {
+
+    agent {
+        label &apos;192.168.0.158&apos;
+    }
+
+    options {
+        timeout(time: 30, unit: &apos;MINUTES&apos;)
+    }
+
+    parameters {
+        //构建选项，选择构建环境
+        choice(name: &apos;release_env&apos;,
+                choices:&apos;dev\npro&apos;,
+                description: &apos;choose release environment\ndev port:6508\npro port:6558\nserver:192.168.0.158&apos;)
+    }
+    tools {
+        maven &apos;M3&apos;
+        jdk &apos;jdk_1.8.0_161&apos;
+    }
+    stages {
+        stage(&apos;准备源码&apos;) {
+            steps {
+                script {
+				    project_name=&quot;k8stest-pymom&quot;
+
+                    // 需要修改自定义的变量
+					svn_addr=&quot;svn://192.168.0.151/pycf/Projects/MOMsystem/outsource-tycqls1.0-analysis&quot;
+                    module_name=&quot;outsourceanalysis&quot;
+                    workdir=&quot;/application/docker_hub/java/k8stest-pymom&quot;
+					r_env=release_env
+
+
+					docker_image=&quot;harbor.pycf.com/${project_name}/${module_name}&quot;
+					deploy_name=&quot;${project_name}-${module_name}-${r_env}&quot;
+					name_space=&quot;${project_name}-${r_env}&quot;
+					deploy_file=&quot;${deploy_name}-deployment.yaml&quot;
+					deploy_path=&quot;/application/k8s-projects/${project_name}/${r_env}/${module_name}/${deploy_file}&quot;
+
+
+                    docker_file_path=&quot;${workdir}/${module_name}_${r_env}&quot;
+                    docker_compose_file=&quot;${workdir}/docker-compose-${r_env}.yml&quot;
+                    docker_compose_module_name=&quot;${project_name}_${module_name}_${r_env}&quot;
+                    // logs
+                    old_date=sh returnStdout: true ,script: &quot;echo \$(date -d &apos;-1 hour&apos; &apos;+%F-%H-%M-%S&apos;)&quot;
+                    old_date=old_date.trim()
+					date=sh returnStdout: true ,script: &quot;echo \$(date &apos;+%F-%H-%M-%S&apos;)&quot;
+                    date=date.trim()
+                    sh &quot;mkdir -p ${module_logs_path}&quot;
+                    docker_containers_path=&quot;/var/lib/docker/containers&quot;
+                }
+                checkout([$class: &apos;SubversionSCM&apos;,
+                additionalCredentials: [],
+                excludedCommitMessages: &apos;&apos;,
+                excludedRegions: &apos;&apos;,
+                excludedRevprop: &apos;&apos;,
+                excludedUsers: &apos;&apos;,
+                filterChangelog: false,
+                ignoreDirPropChanges: false,
+                includedRegions: &apos;&apos;,
+                locations: [[credentialsId: &apos;dffd18a8-473e-477e-a4dc-4d528fa3e55c&apos;,
+                            depthOption: &apos;infinity&apos;,
+                            ignoreExternalsOption: true,
+                            local: &apos;.&apos;,
+                            remote: svn_addr ]],
+                            quietOperation: true,
+                            workspaceUpdater: [$class: &apos;UpdateUpdater&apos;]])
+            }
+        }
+        stage(&apos;MVN打包&apos;) {
+            steps {
+                sh &apos;mvn -B -DskipTests clean package&apos;
+            }
+        }
+        stage(&apos;MVN测试&apos;) {
+            steps {
+                sh &apos;mvn test&apos;
+            }
+        }
+		stage(&apos;创建镜像&apos;) {
+            steps {
+				sh &quot;mkdir -p ${docker_file_path}; rm -rf ${docker_file_path}/app.jar&quot;
+                sh &quot;/bin/cp -a ./target/*.jar ${docker_file_path}/app.jar;&quot;
+				sh &quot;/bin/cp /script/dockerfiles/Dockerfile-java ${docker_file_path}/Dockerfile&quot;
+				sh &quot;cd ${docker_file_path} &amp;&amp; docker build -t ${docker_image}:latest .&quot;
+            }
+        }
+		stage(&apos;上传镜像&apos;) {
+            steps {
+				sh &quot;docker push ${docker_image}:latest  &amp;&amp; docker rmi ${docker_image}:latest&quot;
+            }
+        }
+		stage(&apos;停止服务&apos;) {
+            steps {
+				sh &quot;kubectl delete deploy ${deploy_name} -n ${name_space}&quot;
+            }
+        }
+		stage(&apos;启动服务&apos;) {
+            steps {
+				sh &quot;kubectl apply -f ${deploy_path}&quot;
+            }
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <authToken>dev</authToken>
+  <disabled>false</disabled>
+</flow-definition>
