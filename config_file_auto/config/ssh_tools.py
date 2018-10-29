@@ -6,11 +6,8 @@ import paramiko
 import yaml
 import os
 import sys
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
 
-
-class SshClient:
+class SshClient(object):
     def __init__(self, host, port, user, passwd):
         self.host = host
         self.port = port
