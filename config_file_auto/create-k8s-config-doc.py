@@ -1,8 +1,6 @@
-from jinja2 import Environment, FileSystemLoader
 import os
+from jinja2 import Environment, FileSystemLoader
 from config_file_auto.config.settings import *
-
-
 
 class CreateKubernetesConfigFile:
     def __init__(self, project_name, module_name, stage, register_module_name, harbor_url, register_port, port=None,
@@ -19,12 +17,12 @@ class CreateKubernetesConfigFile:
             'register_port': register_port,
         }
 
-        self.deployment_python_variables = {
-            'project_name': project_name,
-            'module_name': module_name,
-            'harbor_url': harbor_url,
-            'stage': stage,
-        }
+        # self.deployment_python_variables = {
+        #     'project_name': project_name,
+        #     'module_name': module_name,
+        #     'harbor_url': harbor_url,
+        #     'stage': stage,
+        # }
 
         self.resource_limit = {
             'java_mem_requests': java_mem_requests,
@@ -65,7 +63,6 @@ class CreateKubernetesConfigFile:
         if not self.is_register:
             deployment_template = 'k8s-deployment-template.yaml.j2'
             variables = self.deployment_variables
-
         else:
             deployment_template = 'k8s-register-deployment-template.yaml.j2'
             variables = self.deployment_register_variables
@@ -87,17 +84,18 @@ class CreateKubernetesConfigFile:
         self._write_config_file(dir_name, file_name, config_doc)
 
     #创建python yaml文件
-    def create_k8s_deployment_python_config_doc(self):
+    def _create_k8s_deployment_python_config_doc(self):
         deployment_template = 'k8s-deployment-python-template.yaml.j2'
-        variables = self.deployment_python_variables
+        variables = self.deployment_variables
 
         env = Environment(loader=FileSystemLoader(searchpath='./templates'))
         template = env.get_template(deployment_template)
         config_doc = template.render(**variables)
-        file_name = "{project_name}-{module_name}-deployment-python-{stage}.yaml".format(project_name = self.deployment_python_variables["project_name"],
-                                                                                                module_name = self.deployment_python_variables["module_name"],
-                                                                                                stage = self.deployment_python_variables["stage"])
-        dir_name = "{project_name}/{stage}/".format(project_name = self.deployment_python_variables["project_name"],stage = self.deployment_python_variables["stage"])
+        file_name = "{project_name}-{module_name}-deployment-python-{stage}.yaml".format(project_name = self.deployment_variables["project_name"],
+                                                                                                module_name = self.deployment_variables["module_name"],
+                                                                                                stage = self.deployment_variables["stage"])
+        dir_name = "{project_name}/{stage}/" \
+                   "{module_name}".format(project_name = self.deployment_variables["project_name"],stage = self.deployment_variables["stage"],module_name = self.deployment_variables["module_name"])
         self._write_config_file(dir_name,file_name,config_doc)
 
     #创建service文件
@@ -137,6 +135,10 @@ class CreateKubernetesConfigFile:
         self._create_k8s_deployment_config_doc()
         self._create_k8s_service_config_doc()
 
+    def create_k8s_python_config_doc(self):
+        self._create_k8s_service_config_doc()
+        self._create_k8s_deployment_python_config_doc()
+
     #写配置文件
     def _write_config_file(self, dir_name, file_name, doc):
         self._create_dir(dir_name)
@@ -148,23 +150,6 @@ class CreateKubernetesConfigFile:
     def _create_dir(dir_name):
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
-
-
-def create_jenkins_config_file(project_name, module_name, svn_address, dev_port, pro_port, ):
-    env = Environment(loader=FileSystemLoader(searchpath='./templates'))
-    template = env.get_template('jenkins-template.j2')
-    config_doc = template.render(project_name=project_name, module_name=module_name, svn_address=svn_address,
-                                 dev_port=dev_port, pro_port=pro_port)
-
-    dir_name = "{project_name}/jenkins/".format(project_name=project_name,)
-    file_name = "{project_name}-{module_name}.jenkins".format(project_name=project_name, module_name=module_name)
-
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
-    file = "{dir_name}/{file_name}".format(dir_name=dir_name, file_name=file_name)
-    with open(file, 'w') as conf_file:
-        conf_file.write(config_doc)
-
 
 def run(project_id):
     project_info = get_settings_info(project_id)
@@ -182,10 +167,12 @@ def run(project_id):
             register_port = register_pro_port
 
         # 创建注册中心模块信息
-        config = CreateKubernetesConfigFile(project_name, register_module_name, stage,
+        config_register = CreateKubernetesConfigFile(project_name, register_module_name, stage,
                                             register_module_name, harbor_url, register_port, is_register=True)
-        config.create_k8s_config_doc()
+        config_register.create_k8s_config_doc()
 
+        #创建namespace
+        config_register.create_k8s_namespace_config_doc()
         # 创建模块信息
         for module_info in modules:
             module_name, pro_port, dev_port, svn_address, module_type = module_info
@@ -199,8 +186,7 @@ def run(project_id):
             if module_type == 'java':
                 config.create_k8s_config_doc()
             if module_type == "python":
-                config.create_k8s_namespace_config_doc()
-                config.create_k8s_deployment_python_config_doc()
+                config.create_k8s_python_config_doc()
 
 
 if __name__ == '__main__':
