@@ -82,7 +82,7 @@ class Jenkins:
         harbor_url = project_info['harbor_url']
         modules = project_info['modules']
         modules.append(project_info['register'])
-        modules_list = list()
+        view_job_list = list()
         for module_info in modules:
             module_name, pro_port, dev_port, svn_address, module_type = module_info
             module_name = module_name.lower()
@@ -92,7 +92,7 @@ class Jenkins:
                 job_name = "{project_name}-{module_name}".format(project_name=project_name,
                                                                  module_name=module_name)
                 print(job_name)
-                modules_list.append(job_name)
+                view_job_list.append(job_name)
 
                 result = self._create_jenkins_job(job_name, config_xml)
                 if result:
@@ -105,7 +105,7 @@ class Jenkins:
                 job_name = "{project_name}-{module_name}".format(project_name=project_name,
                                                                  module_name=module_name)
                 print(job_name)
-                modules_list.append(job_name)
+                view_job_list.append(job_name)
 
                 result = self._create_jenkins_job(job_name, config_xml)
                 if result:
@@ -114,7 +114,7 @@ class Jenkins:
                     print("job已经存在,请确认你的配置")
         print("test")
 
-        self._create_view(project_name, modules_list)
+        self._create_view(project_name, view_job_list)
 
 
 if __name__ == '__main__':
